@@ -112,7 +112,23 @@ size_t String::capacity()
 
 void String::reserve(size_t n)
 {
-
+	if (n > this->len)
+	{
+		char* bufer = new char[this->len];
+		for (int i = 0; i < this->len; i++)
+		{
+			bufer[i] = this->charArr[i];
+		}
+		delete[] this->charArr;
+		this->charArr = new char[n];
+		for (int i = 0; i < this->len; i++)
+		{
+			this->charArr[i] = bufer[i];
+		}
+		this->charArr[this->len] = '\0';
+		delete[] bufer;
+		this->cap = n;
+	}
 }
 
 void String::clear()
@@ -509,6 +525,8 @@ void String::fullCopy()
 	if (*(this->quantRef) > 1)
 	{
 		(*(this->quantRef))--;
+		this->quantRef = new size_t;
+		*(this->quantRef) = 1;
 		char* buferPtr = this->charArr;
 		this->charArr = new char[this->cap];
 		for (size_t i = 0; i < this->len; i++)
