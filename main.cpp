@@ -4,7 +4,9 @@ using namespace std;
 
 int main()
 {
-	String test1("qwertyuiopasdfgh");
-	test1.substr(4, 11);
+	String test1("qwertyuiop");
+	String test2("QWERTYUIOP");
+	String test3(test2);
+	test3 = test1;
 	return 0;
 }

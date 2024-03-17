@@ -230,14 +230,9 @@ String& String::operator=(const String& str)
 	{
 		delete[] this->charArr;
 	}
-	this->len = str.len;
-	this->cap = str.cap;
-	this->charArr = new char[this->cap];
-	for (size_t i = 0; i < this->len; i++)
-	{
-		this->charArr[i] = str.charArr[i];
-	}
-	this->charArr[this->len] = '\0';
+	this->quantRef = str.quantRef;
+	(*(this->quantRef))++;
+	this->charArr = str.charArr;
 	return *this;
 }
 
