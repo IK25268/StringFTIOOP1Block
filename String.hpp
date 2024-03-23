@@ -20,11 +20,11 @@ public:
     String(const String& str, size_t pos, size_t len = npos);
     virtual ~String();
 
-    size_t size();
-    size_t capacity();
+    size_t size() const;
+    size_t capacity() const;
     void reserve(size_t n = 0);
     void clear();
-    bool empty();
+    bool empty() const;
 
     char& at(size_t pos);
     const char& at(size_t pos) const;

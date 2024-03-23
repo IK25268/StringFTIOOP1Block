@@ -100,17 +100,17 @@ String:: ~String()
 	}
 }
 
-size_t String::size()
+size_t String::size() const
 {
 	return this->len;
 }
 
-size_t String::capacity()
+size_t String::capacity() const
 {
 	return this->cap;
 }
 
-void String::reserve(size_t n)
+void String::reserve(size_t n) 
 {
 	if (n > this->len)
 	{
@@ -147,7 +147,7 @@ void String::clear()
 	this->charArr[0] = '\0';
 }
 
-bool String::empty()
+bool String::empty() const
 {
 	return this->len == 0;
 }
@@ -367,7 +367,6 @@ String& String::erase(size_t pos, size_t len)
 		}
 		this->len -= len;
 		this->charArr[this->len] = '\0';
-		this->reallocStr(this->len);
 	}
 	else
 	{
@@ -406,14 +405,10 @@ String& String::replace(size_t pos, size_t len, size_t n, char c)
 
 void String::swap(String& str)
 {
-	this->fullCopy();
-	str.fullCopy();
-	char* bufer = str.charArr;
-	str.charArr = this->charArr;
-	this->charArr = bufer;
-	size_t buferLen = str.len;
-	str.len = this->len;
-	this->len = buferLen;
+	std::swap(str.charArr, this->charArr);
+	std::swap(str.len, this->len);
+	std::swap(str.cap, this->cap);
+	std::swap(str.quantRef, this->quantRef);
 }
 
 const char* String::data()
