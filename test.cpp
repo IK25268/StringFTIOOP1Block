@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "C:\Users\i.kupa\source\repos\ProjectString\String.cpp"
+#include "D:\prog\VS\StringFTIOOP1Block\String.cpp"
 
 TEST(testConstruct, Construct0)
 {
@@ -42,10 +42,25 @@ TEST(testConstruct, Construct5)
 	ASSERT_STREQ("string1", test5constr.data()) << "strings don't match";
 }
 
-TEST(testOperator, OperatorAT)
+TEST(testOperator, OperatorAT0)
 {
 	String testOperatorAT("string1");
-	ASSERT_EQ('i', testOperatorAT[3]) << "strings don't match";
+	ASSERT_EQ('i', testOperatorAT[3]) << "symbols don't match";
+}
+TEST(testOperator, OperatorAT1)
+{
+	String testOperatorAT("string1");
+	ASSERT_EQ('i', testOperatorAT.at(3)) << "symbols don't match";
+}
+TEST(testOperator, OperatorBack)
+{
+	String testOperatorAT("string1");
+	ASSERT_EQ('1', testOperatorAT.back()) << "symbols don't match";
+}
+TEST(testOperator, OperatorFront)
+{
+	String testOperatorAT("string1");
+	ASSERT_EQ('s', testOperatorAT.front()) << "symbols don't match";
 }
 TEST(testOperator, OperatorPLUS0)
 {
@@ -135,7 +150,7 @@ TEST(testFind, Find1)
 TEST(testFind, Find2)
 {
 	String testFind2("vector2str7ing1");
-	ASSERT_EQ(10, testFind2.find("7", 7)) << "strings don't match";
+	ASSERT_EQ(10, testFind2.find("7", 7)) << "symbols don't match";
 }
 
 TEST(testOtherFunc, Substr)
