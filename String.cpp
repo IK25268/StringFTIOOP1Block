@@ -1,414 +1,446 @@
 #include <iostream>
 #include <cmath>
 #include "String.hpp"
-using namespace std;
+
+void String::initQuantRef()
+{
+	quantRef = new size_t;
+	*(quantRef) = 1;
+}
+
+void String::decrQuantRef()
+{
+	(*(quantRef))--;
+}
+
+void String::addQuantRef(size_t* _quantRef)
+{
+	if (_quantRef != NULL)
+	{
+		quantRef = _quantRef;
+		(*(quantRef))++;
+	}
+}
+
+size_t String::calcLen(const char* _str) const
+{
+	if (_str != NULL)
+	{
+		size_t len = 0;
+		while (*_str++)
+			++len;
+		return len;
+	}
+}
 
 String::String()
 {
-	this->quantRef = new size_t;
-	*(this->quantRef) = 1;
-	this->cap = 10;
-	this->len = 0;
-	this->charArr = new char[this->cap];
-	this->charArr[0] = '\0';
+	initQuantRef();
+	cap = 10;
+	len = 0;
+	charArr = new char[cap];
+	charArr[0] = '\0';
 }
 
-String::String(const char* str)
+String::String(const char* _str)
 {
-	this->quantRef = new size_t;
-	*(this->quantRef) = 1;
-	this->len = 0;
-	while (*str++)
-		++this->len;
-	str = str - (this->len + 1);
-	this->calcCapacity();
-	this->charArr = new char[this->cap];
-	for (size_t i = 0; i < this->len; i++)
+	if (_str != NULL)
 	{
-		this->charArr[i] = str[i];
+		initQuantRef();
+		len = calcLen(_str);
+		calcCapacity();
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
+		{
+			charArr[i] = _str[i];
+		}
+		charArr[len] = '\0';
 	}
-	this->charArr[this->len] = '\0';
 }
 
-String::String(const char* str, size_t n)
+String::String(const char* _str, size_t n)
 {
-	this->quantRef = new size_t;
-	*(this->quantRef) = 1;
-	this->len = n;
-	this->calcCapacity();
-	this->charArr = new char[this->cap];
-	for (size_t i = 0; i < this->len; i++)
+	if (_str != NULL)
 	{
-		this->charArr[i] = str[i];
+		initQuantRef();
+		len = n;
+		calcCapacity();
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
+		{
+			charArr[i] = _str[i];
+		}
+		charArr[len] = '\0';
 	}
-	this->charArr[this->len] = '\0';
 }
 
 String::String(size_t n, char c)
 {
-	this->quantRef = new size_t;
-	*(this->quantRef) = 1;
-	this->len = n;
-	this->calcCapacity();
-	this->charArr = new char[this->cap];
-	for (size_t i = 0; i < this->len; i++)
+	initQuantRef();
+	len = n;
+	calcCapacity();
+	charArr = new char[cap];
+	for (size_t i = 0; i < len; i++)
 	{
-		this->charArr[i] = c;
+		charArr[i] = c;
 	}
-	this->charArr[this->len] = '\0';
+	charArr[len] = '\0';
 }
 
-String::String(const String& str)
+String::String(const String& _str)
 {
-	this->charArr = str.charArr;
-	this->cap = str.cap;
-	this->len = str.len;
-	this->quantRef = str.quantRef;
-	(*(this->quantRef))++;
+	charArr = _str.charArr;
+	cap = _str.cap;
+	len = _str.len;
+	addQuantRef(_str.quantRef);
 }
 
-String::String(const String& str, size_t pos, size_t len)
+String::String(const String& _str, size_t _pos, size_t _len)
 {
-	if ((pos <= str.len) && (pos >= 0))
+	if ((_pos <= _str.len) && (_pos >= 0))
 	{
-		if ((len > str.len - pos) || (len == npos)) len = str.len - pos;
-		this->len = len;
+		initQuantRef();
+		if ((_len > _str.len - _pos) || (_len == npos)) _len = _str.len - _pos;
+		len = _len;
 		calcCapacity();
-		this->charArr = new char[this->cap];
-		for (size_t i = 0; i < this->len; i++)
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
 		{
-			this->charArr[i] = str.charArr[pos + i];
+			charArr[i] = _str.charArr[_pos + i];
 		}
-		this->charArr[len] = '\0';
+		charArr[_len] = '\0';
 	}
 	else
 	{
-		throw out_of_range("message");
+		throw std::out_of_range("message");
 	}
 }
 
 String:: ~String()
 {
-	if (*this->quantRef > 1)
+	if (*quantRef > 1)
 	{
-		(*(this->quantRef))--;
+		decrQuantRef();
 	}
 	else
 	{
-		delete this->quantRef;
-		delete[] this->charArr;
+		delete quantRef;
+		delete[] charArr;
 	}
 }
 
 size_t String::size() const
 {
-	return this->len;
+	return len;
 }
 
 size_t String::capacity() const
 {
-	return this->cap;
+	return cap;
 }
 
 void String::reserve(size_t n) 
 {
-	if (n > this->len)
+	if (n > len)
 	{
-		char* bufer = new char[this->len];
-		for (int i = 0; i < this->len; i++)
+		char* bufer = new char[len];
+		for (int i = 0; i < len; i++)
 		{
-			bufer[i] = this->charArr[i];
+			bufer[i] = charArr[i];
 		}
-		delete[] this->charArr;
-		this->charArr = new char[n];
-		for (int i = 0; i < this->len; i++)
+		delete[] charArr;
+		charArr = new char[n];
+		for (int i = 0; i < len; i++)
 		{
-			this->charArr[i] = bufer[i];
+			charArr[i] = bufer[i];
 		}
-		this->charArr[this->len] = '\0';
+		charArr[len] = '\0';
 		delete[] bufer;
-		this->cap = n;
+		cap = n;
 	}
 }
 
 void String::clear()
 {
-	if (*this->quantRef > 1)
+	if (*quantRef > 1)
 	{
-		(*(this->quantRef))--;
+		decrQuantRef();
 	}
 	else
 	{
-		delete[]this->charArr;
+		delete[]charArr;
 	}
-	this->len = 0;
-	this->calcCapacity();
-	this->charArr = new char[this->cap];
-	this->charArr[0] = '\0';
+	len = 0;
+	calcCapacity();
+	charArr = new char[cap];
+	charArr[0] = '\0';
 }
 
 bool String::empty() const
 {
-	return this->len == 0;
+	return len == 0;
 }
 
-char& String::at(size_t pos)
+char& String::at(size_t _pos)
 {
-	this->fullCopy();
-	return pos < this->len ? this->charArr[pos] : throw exception();
+	if (_pos < len)
+	{
+		return charArr[_pos];
+	}
+	else
+	{
+		throw std::exception();
+	}
 }
 
-const char& String::at(size_t pos) const
+const char& String::at(size_t _pos) const
 {
-	return pos < this->len ? this->charArr[pos] : throw exception();
+	return _pos < len ? charArr[_pos] : throw std::exception();
 }
 
-char& String::operator[](size_t pos)
+char& String::operator[](size_t _pos)
 {
-	this->fullCopy();
-	return pos < this->len ? this->charArr[pos] : throw exception();
+	return at(_pos);
 }
 
-const char& String::operator[](size_t pos) const
+const char& String::operator[](size_t _pos) const
 {
-	return pos < this->len ? this->charArr[pos] : throw exception();
+	return at(_pos);
 }
 
 char& String::back()
 {
-	this->fullCopy();
-	return this->charArr[this->len - 1];
+	return charArr[len - 1];
 }
 
 const char& String::back() const
 {
-	return this->charArr[this->len - 1];
+	return charArr[len - 1];
 }
 
 char& String::front()
 {
-	this->fullCopy();
-	return this->charArr[0];
+	return charArr[0];
 }
 
 const char& String::front() const
 {
-	return this->charArr[0];
+	return charArr[0];
 }
 
-String& String::operator+=(const String& str)
+String& String::operator+=(const String& _str)
 {
-	this->fullCopy();
-	size_t bufLen = this->len;
-	this->reallocStr(this->len + str.len);
-	this->len += str.len;
-	for (size_t i = bufLen; i < (this->len); i++)
+	fullCopy();
+	size_t bufLen = len;
+	reallocStr(len + _str.len);
+	len += _str.len;
+	for (size_t i = bufLen; i < (len); i++)
 	{
-		this->charArr[i] = str.charArr[i - bufLen];
+		charArr[i] = _str.charArr[i - bufLen];
 	}
-	this->charArr[this->len] = '\0';
+	charArr[len] = '\0';
 	return *this;
 }
 
-String& String::operator+=(const char* str)
+String& String::operator+=(const char* _str)
 {
-	this->fullCopy();
-	size_t bufLen = this->len;
-	while (*str++)
-		++this->len;
-	str = str - (this->len - bufLen + 1);
-	this->reallocStr(this->len);
-	for (size_t i = bufLen; i < this->len; i++)
+	if (_str != NULL)
 	{
-		this->charArr[i] = str[i - bufLen];
+		fullCopy();
+		size_t bufLen = len;
+		len += calcLen(_str);
+		reallocStr(len);
+		for (size_t i = bufLen; i < len; i++)
+		{
+			charArr[i] = _str[i - bufLen];
+		}
+		charArr[len] = '\0';
+		return *this;
 	}
-	this->charArr[this->len] = '\0';
-	return *this;
 }
 
 String& String::operator+=(char c)
 {
-	this->fullCopy();
-	this->len++;
-	this->reallocStr(this->len);
-	this->charArr[this->len - 1] = c;
-	this->charArr[this->len] = '\0';
+	fullCopy();
+	len++;
+	reallocStr(len);
+	charArr[len - 1] = c;
+	charArr[len] = '\0';
 	return *this;
 }
 
-String& String::operator=(const String& str)
+String& String::operator=(const String& _str)
 {
-	if (*this->quantRef > 1)
+	if (*quantRef > 1)
 	{
-		(*(this->quantRef))--;
+		decrQuantRef();
 	}
 	else
 	{
-		delete[] this->charArr;
+		delete[] charArr;
 	}
-	this->quantRef = str.quantRef;
-	(*(this->quantRef))++;
-	this->charArr = str.charArr;
+	addQuantRef(_str.quantRef);
+	charArr = _str.charArr;
 	return *this;
 }
 
-String& String::operator=(const char* str)
+String& String::operator=(const char* _str)
 {
-	if (*this->quantRef > 1)
+	if (_str != NULL)
 	{
-		(*(this->quantRef))--;
-	}
-	else
-	{
-		delete[] this->charArr;
-	}
-	this->len = 0;
-	while (*str++)
-		++this->len;
-	str = str - (this->len + 1);
-	this->calcCapacity();
-	this->charArr = new char[this->cap];
-	for (size_t i = 0; i < this->len; i++)
-	{
-		this->charArr[i] = str[i];
-	}
-	this->charArr[this->len] = '\0';
-	return *this;
-}
-
-String& String::insert(size_t pos, const String& str)
-{
-	if ((pos <= this->len) && (pos >= 0))
-	{
-		this->fullCopy();
-		this->reallocStr(this->len + str.len);
-		char* buferSecond = NULL;
-		if ((this->len - pos) > 0)
+		if (*quantRef > 1)
 		{
-			buferSecond = new char[this->len - pos];
-			for (size_t i = pos; i < this->len; i++)
+			decrQuantRef();
+		}
+		else
+		{
+			delete[] charArr;
+		}
+		len = calcLen(_str);
+		calcCapacity();
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
+		{
+			charArr[i] = _str[i];
+		}
+		charArr[len] = '\0';
+		return *this;
+	}
+}
+
+String& String::insert(size_t _pos, const String& _str)
+{
+	if ((_pos <= len) && (_pos >= 0))
+	{
+		fullCopy();
+		reallocStr(len + _str.len);
+		char* buferSecond = NULL;
+		if ((len - _pos) > 0)
+		{
+			buferSecond = new char[len - _pos];
+			for (size_t i = _pos; i < len; i++)
 			{
-				buferSecond[i - pos] = this->charArr[i];
+				buferSecond[i - _pos] = charArr[i];
 			}
 		}
-		for (size_t i = pos; i < pos + str.len; i++)
+		for (size_t i = _pos; i < _pos + _str.len; i++)
 		{
-			this->charArr[i] = str[i - pos];
+			charArr[i] = _str[i - _pos];
 		}
 		if (buferSecond != NULL)
 		{
-			for (size_t i = pos + str.len; i < this->len + str.len; i++)
+			for (size_t i = _pos + _str.len; i < len + _str.len; i++)
 			{
-				this->charArr[i] = buferSecond[i - pos - str.len];
+				charArr[i] = buferSecond[i - _pos - _str.len];
 			}
 		}
-		this->len += str.len;
-		this->charArr[this->len] = '\0';
+		len += _str.len;
+		charArr[len] = '\0';
 		delete[]buferSecond;
 	}
 	else
 	{
-		throw out_of_range("message");
+		throw std::out_of_range("message");
 	}
 	return *this;
 }
 
-String& String::insert(size_t pos, const char* str)
+String& String::insert(size_t _pos, const char* _str)
 {
-	if ((pos <= this->len) && (pos >= 0))
+	if (_str != NULL)
 	{
-		this->fullCopy();
-		size_t strLen = 0;
-		while (*str++)
-			++strLen;
-		str = str - (strLen + 1);
-		this->reallocStr(this->len + strLen);
-		char* buferSecond = NULL;
-		if ((this->len - pos) > 0)
+		if ((_pos <= len) && (_pos >= 0))
 		{
-			buferSecond = new char[this->len - pos];
-			for (size_t i = pos; i < this->len; i++)
+			fullCopy();
+			size_t strLen = calcLen(_str);
+			reallocStr(len + strLen);
+			char* buferSecond = NULL;
+			if ((len - _pos) > 0)
 			{
-				buferSecond[i - pos] = this->charArr[i];
+				buferSecond = new char[len - _pos];
+				for (size_t i = _pos; i < len; i++)
+				{
+					buferSecond[i - _pos] = charArr[i];
+				}
 			}
-		}
-		for (size_t i = pos; i < pos + strLen; i++)
-		{
-			this->charArr[i] = str[i - pos];
-		}
-		if (buferSecond != NULL)
-		{
-			for (size_t i = pos + strLen; i < this->len + strLen; i++)
+			for (size_t i = _pos; i < _pos + strLen; i++)
 			{
-				this->charArr[i] = buferSecond[i - pos - strLen];
+				charArr[i] = _str[i - _pos];
 			}
+			if (buferSecond != NULL)
+			{
+				for (size_t i = _pos + strLen; i < len + strLen; i++)
+				{
+					charArr[i] = buferSecond[i - _pos - strLen];
+				}
+			}
+			len += strLen;
+			charArr[len] = '\0';
+			delete[]buferSecond;
 		}
-		this->len += strLen;
-		this->charArr[this->len] = '\0';
-		delete[]buferSecond;
+		else
+		{
+			throw std::out_of_range("message");
+		}
+		return *this;
+	}
+}
+
+String& String::erase(size_t _pos, size_t _len)
+{
+	if ((_pos <= len) && (_pos >= 0))
+	{
+		fullCopy();
+		if (_len < 0) _len = 0;
+		if ((_len > len - _pos) || (_len == npos)) _len = len - _pos;
+		for (size_t i = _pos + _len; i < len; i++)
+		{
+			charArr[i - _len] = charArr[i];
+		}
+		len -= _len;
+		charArr[len] = '\0';
 	}
 	else
 	{
-		throw out_of_range("message");
+		throw std::out_of_range("message");
 	}
 	return *this;
 }
 
-String& String::erase(size_t pos, size_t len)
+String& String::replace(size_t _pos, size_t _len, const String& _str)
 {
-	if ((pos <= this->len) && (pos >= 0))
-	{
-		this->fullCopy();
-		if (len < 0) len = 0;
-		if ((len > this->len - pos) || (len == npos)) len = this->len - pos;
-		for (size_t i = pos + len; i < this->len; i++)
-		{
-			this->charArr[i - len] = this->charArr[i];
-		}
-		this->len -= len;
-		this->charArr[this->len] = '\0';
-	}
-	else
-	{
-		throw out_of_range("message");
-	}
+	erase(_pos, _len);
+	insert(_pos, _str);
 	return *this;
 }
 
-String& String::replace(size_t pos, size_t len, const String& str)
+String& String::replace(size_t _pos, size_t _len, const char* _str)
 {
-	this->erase(pos, len);
-	this->insert(pos, str);
+	erase(_pos, _len);
+	insert(_pos, _str);
 	return *this;
 }
 
-String& String::replace(size_t pos, size_t len, const char* str)
+String& String::replace(size_t _pos, size_t _len, size_t n, char c)
 {
-	this->erase(pos, len);
-	this->insert(pos, str);
-	return *this;
-}
-
-String& String::replace(size_t pos, size_t len, size_t n, char c)
-{
-	this->erase(pos, len);
+	erase(_pos, _len);
 	char* bufStr = new char[n + 1];
 	for (size_t i = 0; i < n; i++)
 	{
 		bufStr[i] = c;
 	}
 	bufStr[n] = '\0';
-	this->insert(pos, bufStr);
+	insert(_pos, bufStr);
 	delete[]bufStr;
 	return *this;
 }
 
-void String::swap(String& str)
+void String::swap(String& _str)
 {
-	std::swap(str.charArr, this->charArr);
-	std::swap(str.len, this->len);
-	std::swap(str.cap, this->cap);
-	std::swap(str.quantRef, this->quantRef);
+	std::swap(_str.charArr, charArr);
+	std::swap(_str.len, len);
+	std::swap(_str.cap, cap);
+	std::swap(_str.quantRef, quantRef);
 }
 
 const char* String::data()
@@ -416,16 +448,16 @@ const char* String::data()
 	return this->charArr;
 }
 
-size_t String::find(const String& str, size_t pos)
+size_t String::find(const String& _str, size_t _pos) const
 {
-	if ((pos >= 0) && (pos < this->len))
+	if ((_pos >= 0) && (_pos < len))
 	{
 		int count = 0;
-		for (size_t i = pos; i < this->len; i++)
+		for (size_t i = _pos; i < len; i++)
 		{
-			if (this->charArr[i] != str.charArr[count]) count = 0;
-			if (this->charArr[i] == str.charArr[count]) count++;
-			if (count == str.len) return (i - count + 1);
+			if (charArr[i] != _str.charArr[count]) count = 0;
+			if (charArr[i] == _str.charArr[count]) count++;
+			if (count == _str.len) return (i - count + 1);
 		}
 		return npos;
 	}
@@ -435,20 +467,36 @@ size_t String::find(const String& str, size_t pos)
 	}
 }
 
-size_t String::find(const char* str, size_t pos)
+size_t String::find(const char* _str, size_t _pos) const
 {
-	if ((pos >= 0) && (pos < this->len))
+	if (_str != NULL)
 	{
-		size_t strLen = 0;
-		while (*str++)
-			++strLen;
-		str = str - (strLen + 1);
-		int count = 0;
-		for (size_t i = pos; i < this->len; i++)
+		if ((_pos >= 0) && (_pos < len))
 		{
-			if (this->charArr[i] != str[count]) count = 0;
-			if (this->charArr[i] == str[count]) count++;
-			if (count == strLen) return (i - count + 1);
+			size_t strLen = calcLen(_str);
+			int count = 0;
+			for (size_t i = _pos; i < len; i++)
+			{
+				if (charArr[i] != _str[count]) count = 0;
+				if (charArr[i] == _str[count]) count++;
+				if (count == strLen) return (i - count + 1);
+			}
+			return npos;
+		}
+		else
+		{
+			return npos;
+		}
+	}
+}
+
+size_t String::find(char c, size_t _pos) const
+{
+	if ((_pos >= 0) && (_pos < len))
+	{
+		for (size_t i = _pos; i < len; i++)
+		{
+			if (charArr[i] == c) return i;
 		}
 		return npos;
 	}
@@ -458,113 +506,96 @@ size_t String::find(const char* str, size_t pos)
 	}
 }
 
-size_t String::find(char c, size_t pos)
+String String::substr(size_t _pos, size_t _len) 
 {
-	if ((pos >= 0) && (pos < this->len))
+	if ((_pos >= 0) && (_pos < len))
 	{
-		for (size_t i = pos; i < this->len; i++)
+		fullCopy();
+		if ((_len > len - _pos) || (_len == npos)) _len = len - _pos;
+		char* bufer = new char[_len];
+		for (size_t i = _pos; i < _pos + _len; i++)
 		{
-			if (this->charArr[i] == c) return i;
+			bufer[i - _pos] = charArr[i];
 		}
-		return npos;
-	}
-	else
-	{
-		return npos;
-	}
-}
-
-String String::substr(size_t pos, size_t len)
-{
-	if ((pos >= 0) && (pos < this->len))
-	{
-		this->fullCopy();
-		if ((len > this->len - pos) || (len == npos)) len = this->len - pos;
-		char* bufer = new char[len];
-		for (size_t i = pos; i < pos + len; i++)
+		delete[]charArr;
+		len = _len;
+		calcCapacity();
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
 		{
-			bufer[i - pos] = this->charArr[i];
+			charArr[i] = bufer[i];
 		}
-		delete[]this->charArr;
-		this->len = len;
-		this->calcCapacity();
-		this->charArr = new char[this->cap];
-		for (size_t i = 0; i < this->len; i++)
-		{
-			this->charArr[i] = bufer[i];
-		}
-		this->charArr[this->len] = '\0';
+		charArr[len] = '\0';
 		delete[]bufer;
 	}
 	else
 	{
-		throw out_of_range("message");
+		throw std::out_of_range("message");
 	}
 	return *this;
 }
 
-int String::compare(const String& str)
+int String::compare(const String& _str) const
 {
-	for (size_t i = 0; (i < this->len) || (i < str.len); i++)
+	for (size_t i = 0; (i < len) || (i < _str.len); i++)
 	{
-		if (i == str.len) return 1;
-		if (i == this->len) return -1;
-		if (this->charArr[i] > str.charArr[i]) return 1;
-		if (this->charArr[i] < str.charArr[i]) return -1;
+		if (i == _str.len) return 1;
+		if (i == len) return -1;
+		if (charArr[i] > _str.charArr[i]) return 1;
+		if (charArr[i] < _str.charArr[i]) return -1;
 	}
 	return 0;
 }
 
 void String::fullCopy()
 {
-	if (*(this->quantRef) > 1)
+	if (*(quantRef) > 1)
 	{
-		(*(this->quantRef))--;
-		this->quantRef = new size_t;
-		*(this->quantRef) = 1;
-		char* buferPtr = this->charArr;
-		this->charArr = new char[this->cap];
-		for (size_t i = 0; i < this->len; i++)
+		decrQuantRef();
+		initQuantRef();
+		char* buferPtr = charArr;
+		charArr = new char[cap];
+		for (size_t i = 0; i < len; i++)
 		{
-			this->charArr[i] = buferPtr[i];
+			charArr[i] = buferPtr[i];
 		}
-		this->charArr[this->len] = '\0';
+		charArr[len] = '\0';
 	}
 }
 
-void String::calcCapacity(size_t len)
+void String::calcCapacity(size_t _len) 
 {
-	this->cap = 10 * (len / 10 + 1);
+	cap = 10 * (_len / 10 + 1);
 }
 
-void String::calcCapacity()
+void String::calcCapacity() 
 {
-	this->cap = 10 * (this->len / 10 + 1);
+	cap = 10 * (len / 10 + 1);
 }
 
-void String::reallocStr(size_t newLen)
+void String::reallocStr(size_t _newLen)
 {
-	size_t buferCap = this->cap;
-	calcCapacity(newLen);
-	if (this->cap != buferCap)
+	size_t buferCap = cap;
+	calcCapacity(_newLen);
+	if (cap != buferCap)
 	{
-		char* bufer = new char[this->len];
-		for (int i = 0; i < this->len; i++)
+		char* bufer = new char[len];
+		for (int i = 0; i < len; i++)
 		{
-			bufer[i] = this->charArr[i];
+			bufer[i] = charArr[i];
 		}
-		delete[] this->charArr;
-		this->charArr = new char[this->cap];
-		for (int i = 0; i < this->len; i++)
+		delete[] charArr;
+		charArr = new char[cap];
+		for (int i = 0; i < len; i++)
 		{
-			this->charArr[i] = bufer[i];
+			charArr[i] = bufer[i];
 		}
-		this->charArr[this->len] = '\0';
+		charArr[len] = '\0';
 		delete[] bufer;
 	}
 }
 
-size_t String::countRef()
+size_t String::countRef() const
 {
-	return *this->quantRef;
+	return *quantRef;
 }
