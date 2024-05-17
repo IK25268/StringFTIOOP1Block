@@ -101,15 +101,15 @@ TEST(testOperator, OperatorEQ1)
 TEST(testInsert, Insert0)
 {
 	String testInsert0("string1");
-	String testInsert("vector2");
+	String testInsert("vector25");
 	testInsert0.insert(3, testInsert);
-	ASSERT_STREQ("strvector2ing1", testInsert0.data()) << "strings don't match";
+	ASSERT_STREQ("strvector25ing1", testInsert0.data()) << "strings don't match";
 }
 TEST(testInsert, Insert1)
 {
 	String testInsert0("string1");
-	testInsert0.insert(3, "vector2");
-	ASSERT_STREQ("strvector2ing1", testInsert0.data()) << "strings don't match";
+	testInsert0.insert(3, "vector25");
+	ASSERT_STREQ("strvector25ing1", testInsert0.data()) << "strings don't match";
 }
 TEST(testErase, Erase0)
 {
