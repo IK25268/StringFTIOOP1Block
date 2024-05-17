@@ -22,16 +22,16 @@ void String::addQuantRef(size_t* _quantRef)
 	}
 }
 
-size_t String::calcLen(const char* _str) const
-{
-	if (_str != NULL)
-	{
-		size_t len = 0;
-		while (*_str++)
-			++len;
-		return len;
-	}
-}
+//size_t String::calcLen(const char* _str) const
+//{
+//	if (_str != NULL)
+//	{
+//		size_t len = 0;
+//		while (*_str++)
+//			++len;
+//		return len;
+//	}
+//}
 
 String::String()
 {
@@ -47,13 +47,14 @@ String::String(const char* _str)
 	if (_str != NULL)
 	{
 		initQuantRef();
-		len = calcLen(_str);
+		len = strlen(_str);
 		calcCapacity();
 		charArr = new char[cap];
-		for (size_t i = 0; i < len; i++)
-		{
-			charArr[i] = _str[i];
-		}
+		//for (size_t i = 0; i < len; i++)
+		//{
+		//	charArr[i] = _str[i];
+		//}
+		memcpy(charArr, _str, len * sizeof(char));
 		charArr[len] = '\0';
 	}
 }
@@ -66,10 +67,11 @@ String::String(const char* _str, size_t n)
 		len = n;
 		calcCapacity();
 		charArr = new char[cap];
-		for (size_t i = 0; i < len; i++)
-		{
-			charArr[i] = _str[i];
-		}
+		//for (size_t i = 0; i < len; i++)
+		//{
+		//	charArr[i] = _str[i];
+		//}
+		memcpy(charArr, _str, len * sizeof(char));
 		charArr[len] = '\0';
 	}
 }
@@ -104,10 +106,11 @@ String::String(const String& _str, size_t _pos, size_t _len)
 		len = _len;
 		calcCapacity();
 		charArr = new char[cap];
-		for (size_t i = 0; i < len; i++)
-		{
-			charArr[i] = _str.charArr[_pos + i];
-		}
+		//for (size_t i = 0; i < len; i++)
+		//{
+		//	charArr[i] = _str.charArr[_pos + i];
+		//}
+		memcpy(charArr, &(_str.charArr[_pos]), len * sizeof(char));
 		charArr[_len] = '\0';
 	}
 	else
@@ -139,21 +142,23 @@ size_t String::capacity() const
 	return cap;
 }
 
-void String::reserve(size_t n) 
+void String::reserve(size_t n)
 {
 	if (n > len)
 	{
 		char* bufer = new char[len];
-		for (int i = 0; i < len; i++)
-		{
-			bufer[i] = charArr[i];
-		}
+		//for (int i = 0; i < len; i++)
+		//{
+		//	bufer[i] = charArr[i];
+		//}
+		memcpy(bufer, charArr, len * sizeof(char));
 		delete[] charArr;
 		charArr = new char[n];
-		for (int i = 0; i < len; i++)
-		{
-			charArr[i] = bufer[i];
-		}
+		//for (int i = 0; i < len; i++)
+		//{
+		//	charArr[i] = bufer[i];
+		//}
+		memcpy(charArr, bufer, len * sizeof(char));
 		charArr[len] = '\0';
 		delete[] bufer;
 		cap = n;
@@ -210,12 +215,14 @@ const char& String::operator[](size_t _pos) const
 
 char& String::back()
 {
-	return charArr[len - 1];
+	if (len != 0) return charArr[len - 1];
+	else return charArr[0];
 }
 
 const char& String::back() const
 {
-	return charArr[len - 1];
+	if (len != 0) return charArr[len - 1];
+	else return charArr[0];
 }
 
 char& String::front()
@@ -234,10 +241,11 @@ String& String::operator+=(const String& _str)
 	size_t bufLen = len;
 	reallocStr(len + _str.len);
 	len += _str.len;
-	for (size_t i = bufLen; i < (len); i++)
-	{
-		charArr[i] = _str.charArr[i - bufLen];
-	}
+	//for (size_t i = 0; i < (len - bufLen); i++)
+	//{
+	//	charArr[bufLen + i] = _str.charArr[i];
+	//}
+	memcpy(&(charArr[bufLen]), _str.charArr, (len - bufLen) * sizeof(char));
 	charArr[len] = '\0';
 	return *this;
 }
@@ -248,12 +256,13 @@ String& String::operator+=(const char* _str)
 	{
 		fullCopy();
 		size_t bufLen = len;
-		len += calcLen(_str);
+		len += strlen(_str);
 		reallocStr(len);
-		for (size_t i = bufLen; i < len; i++)
-		{
-			charArr[i] = _str[i - bufLen];
-		}
+		//for (size_t i = bufLen; i < len; i++)
+		//{
+		//	charArr[i] = _str[i - bufLen];
+		//}
+		memcpy(&(charArr[bufLen]), _str, (len - bufLen) * sizeof(char));
 		charArr[len] = '\0';
 		return *this;
 	}
@@ -296,13 +305,14 @@ String& String::operator=(const char* _str)
 		{
 			delete[] charArr;
 		}
-		len = calcLen(_str);
+		len = strlen(_str);
 		calcCapacity();
 		charArr = new char[cap];
 		for (size_t i = 0; i < len; i++)
 		{
 			charArr[i] = _str[i];
 		}
+		memcpy(charArr, _str, len * sizeof(char));
 		charArr[len] = '\0';
 		return *this;
 	}
@@ -310,37 +320,43 @@ String& String::operator=(const char* _str)
 
 String& String::insert(size_t _pos, const String& _str)
 {
-	if ((_pos <= len) && (_pos >= 0))
+	if (_str.len != 0)
 	{
-		fullCopy();
-		reallocStr(len + _str.len);
-		char* buferSecond = NULL;
-		if ((len - _pos) > 0)
+		if ((_pos <= len) && (_pos >= 0))
 		{
-			buferSecond = new char[len - _pos];
-			for (size_t i = _pos; i < len; i++)
+			fullCopy();
+			reallocStr(len + _str.len);
+			char* buferSecond = NULL;
+			if ((len - _pos) > 0)
 			{
-				buferSecond[i - _pos] = charArr[i];
+				buferSecond = new char[len - _pos];
+				//for (size_t i = 0; i < len - _pos; i++)
+				//{
+				//	buferSecond[i] = charArr[i+_pos];
+				//}
+				memcpy(buferSecond, &(charArr[_pos]), (len - _pos) * sizeof(char));
 			}
-		}
-		for (size_t i = _pos; i < _pos + _str.len; i++)
-		{
-			charArr[i] = _str[i - _pos];
-		}
-		if (buferSecond != NULL)
-		{
-			for (size_t i = _pos + _str.len; i < len + _str.len; i++)
+			//for (size_t i = 0; i < _str.len; i++)
+			//{
+			//	charArr[i+_pos] = _str[i];
+			//}
+			memcpy(&(charArr[_pos]), _str.charArr, _str.len * sizeof(char));
+			if (buferSecond != NULL)
 			{
-				charArr[i] = buferSecond[i - _pos - _str.len];
+				//for (size_t i = _pos + _str.len; i < len + _str.len; i++)
+				//{
+				//	charArr[i] = buferSecond[i - _pos - _str.len];
+				//}
+				memcpy(&(charArr[_pos + _str.len]), buferSecond, (len - _pos) * sizeof(char));
 			}
+			len += _str.len;
+			charArr[len] = '\0';
+			delete[]buferSecond;
 		}
-		len += _str.len;
-		charArr[len] = '\0';
-		delete[]buferSecond;
-	}
-	else
-	{
-		throw std::out_of_range("message");
+		else
+		{
+			throw std::out_of_range("message");
+		}
 	}
 	return *this;
 }
@@ -352,27 +368,30 @@ String& String::insert(size_t _pos, const char* _str)
 		if ((_pos <= len) && (_pos >= 0))
 		{
 			fullCopy();
-			size_t strLen = calcLen(_str);
+			size_t strLen = strlen(_str);
 			reallocStr(len + strLen);
 			char* buferSecond = NULL;
 			if ((len - _pos) > 0)
 			{
 				buferSecond = new char[len - _pos];
-				for (size_t i = _pos; i < len; i++)
-				{
-					buferSecond[i - _pos] = charArr[i];
-				}
+				//for (size_t i = _pos; i < len; i++)
+				//{
+				//	buferSecond[i - _pos] = charArr[i];
+				//}
+				memcpy(buferSecond, &(charArr[_pos]), (len - _pos) * sizeof(char));
 			}
-			for (size_t i = _pos; i < _pos + strLen; i++)
-			{
-				charArr[i] = _str[i - _pos];
-			}
+			//for (size_t i = _pos; i < _pos + strLen; i++)
+			//{
+			//	charArr[i] = _str[i - _pos];
+			//}
+			memcpy(&(charArr[_pos]), _str, strLen * sizeof(char));
 			if (buferSecond != NULL)
 			{
-				for (size_t i = _pos + strLen; i < len + strLen; i++)
-				{
-					charArr[i] = buferSecond[i - _pos - strLen];
-				}
+				//for (size_t i = _pos + strLen; i < len + strLen; i++)
+				//{
+				//	charArr[i] = buferSecond[i - _pos - strLen];
+				//}
+				memcpy(&(charArr[_pos + strLen]), buferSecond, (len - _pos) * sizeof(char));
 			}
 			len += strLen;
 			charArr[len] = '\0';
@@ -382,8 +401,8 @@ String& String::insert(size_t _pos, const char* _str)
 		{
 			throw std::out_of_range("message");
 		}
-		return *this;
 	}
+	return *this;
 }
 
 String& String::erase(size_t _pos, size_t _len)
@@ -393,10 +412,11 @@ String& String::erase(size_t _pos, size_t _len)
 		fullCopy();
 		if (_len < 0) _len = 0;
 		if ((_len > len - _pos) || (_len == npos)) _len = len - _pos;
-		for (size_t i = _pos + _len; i < len; i++)
-		{
-			charArr[i - _len] = charArr[i];
-		}
+		//for (size_t i = 0; i < len - _pos - _len; i++)
+		//{
+		//	charArr[i + _pos] = charArr[i + _pos + _len];
+		//}
+		memcpy(&(charArr[_pos]), &(charArr[_pos + _len]), (len - _pos - _len) * sizeof(char));
 		len -= _len;
 		charArr[len] = '\0';
 	}
@@ -473,7 +493,7 @@ size_t String::find(const char* _str, size_t _pos) const
 	{
 		if ((_pos >= 0) && (_pos < len))
 		{
-			size_t strLen = calcLen(_str);
+			size_t strLen = strlen(_str);
 			int count = 0;
 			for (size_t i = _pos; i < len; i++)
 			{
@@ -506,25 +526,27 @@ size_t String::find(char c, size_t _pos) const
 	}
 }
 
-String String::substr(size_t _pos, size_t _len) 
+String String::substr(size_t _pos, size_t _len)
 {
 	if ((_pos >= 0) && (_pos < len))
 	{
 		fullCopy();
 		if ((_len > len - _pos) || (_len == npos)) _len = len - _pos;
 		char* bufer = new char[_len];
-		for (size_t i = _pos; i < _pos + _len; i++)
-		{
-			bufer[i - _pos] = charArr[i];
-		}
+		//for (size_t i = 0; i < _len; i++)
+		//{
+		//	bufer[i] = charArr[i+_pos];
+		//}
+		memcpy(bufer, &(charArr[_pos]), _len * sizeof(char));
 		delete[]charArr;
 		len = _len;
 		calcCapacity();
 		charArr = new char[cap];
-		for (size_t i = 0; i < len; i++)
-		{
-			charArr[i] = bufer[i];
-		}
+		//for (size_t i = 0; i < len; i++)
+		//{
+		//	charArr[i] = bufer[i];
+		//}
+		memcpy(charArr, bufer, len * sizeof(char));
 		charArr[len] = '\0';
 		delete[]bufer;
 	}
@@ -555,20 +577,21 @@ void String::fullCopy()
 		initQuantRef();
 		char* buferPtr = charArr;
 		charArr = new char[cap];
-		for (size_t i = 0; i < len; i++)
-		{
-			charArr[i] = buferPtr[i];
-		}
+		//for (size_t i = 0; i < len; i++)
+		//{
+		//	charArr[i] = buferPtr[i];
+		//}
+		memcpy(charArr, buferPtr, (len) * sizeof(char));
 		charArr[len] = '\0';
 	}
 }
 
-void String::calcCapacity(size_t _len) 
+void String::calcCapacity(size_t _len)
 {
 	cap = 10 * (_len / 10 + 1);
 }
 
-void String::calcCapacity() 
+void String::calcCapacity()
 {
 	cap = 10 * (len / 10 + 1);
 }
@@ -580,16 +603,18 @@ void String::reallocStr(size_t _newLen)
 	if (cap != buferCap)
 	{
 		char* bufer = new char[len];
-		for (int i = 0; i < len; i++)
-		{
-			bufer[i] = charArr[i];
-		}
+		//for (int i = 0; i < len; i++)
+		//{
+		//	bufer[i] = charArr[i];
+		//}
+		memcpy(bufer, charArr, (len) * sizeof(char));
 		delete[] charArr;
 		charArr = new char[cap];
-		for (int i = 0; i < len; i++)
-		{
-			charArr[i] = bufer[i];
-		}
+		//for (int i = 0; i < len; i++)
+		//{
+		//	charArr[i] = bufer[i];
+		//}
+		memcpy(charArr, bufer, (len) * sizeof(char));
 		charArr[len] = '\0';
 		delete[] bufer;
 	}
@@ -597,5 +622,6 @@ void String::reallocStr(size_t _newLen)
 
 size_t String::countRef() const
 {
-	return *quantRef;
+	if (quantRef != NULL) return *quantRef;
+	return NULL;
 }

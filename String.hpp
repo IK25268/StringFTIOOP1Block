@@ -1,4 +1,4 @@
-#ifndef __String_hpp
+﻿#ifndef __String_hpp
 #define __String_hpp
 
 class String {
@@ -10,7 +10,7 @@ private:
     void initQuantRef();
     void decrQuantRef();
     void addQuantRef(size_t* _quantRef);
-    size_t calcLen(const char* _str) const;
+    //size_t calcLen(const char* _str) const;
     void fullCopy();
     void calcCapacity(size_t len);
     void calcCapacity();
